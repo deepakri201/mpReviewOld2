@@ -653,8 +653,8 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
   #   return process.stdout.read()
   
     # print('trying to use class from DICOMwebBrowser')
-    # self.gcp = GoogleCloudPlatform()
-    self.gcp = DICOMwebBrowser.GoogleCloudPlatform()
+    self.gcp = GoogleCloudPlatform()
+    # self.gcp = DICOMwebBrowser.GoogleCloudPlatform()
     print('projects: ' + str(self.gcp.projects()))
       
     self.projectSelectorCombobox.addItems(self.gcp.projects())

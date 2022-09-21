@@ -2105,7 +2105,8 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
   def loadVolumeFromRemoteDatabase(self, selectedStudy, selectedSeries):
     """ Load a series from a remote DICOM server """
           
-    indexer = ctk.ctkDICOMIndexer()        
+    indexer = ctk.ctkDICOMIndexer()  
+    indexer.backgroundImportEnabled=True      
   
     # A temporary directory for the downloaded DICOM files from the remote database 
     downloadDirectory = os.path.join(slicer.dicomDatabase.databaseDirectory, 'tmp')
@@ -2119,6 +2120,8 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
                           study_instance_uid=selectedStudy,
                           series_instance_uid=selectedSeries
                           )
+    # print ('slicer process events')
+    # slicer.app.processEvents()
     # print ('search_for_instances in remote database')
     
     # The instances that are already in the DICOM database, no need to download  
@@ -2144,8 +2147,14 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
         
     # Now add the directory to the DICOM database
     print ('adding the directory to the DICOM database')
-    indexer.addDirectory(slicer.dicomDatabase, downloadDirectory, True)  # index with file copy
-    indexer.waitForImportFinished()
+    files_saved = [f for f in os.listdir(downloadDirectory) if f.endswith('.dcm')]
+    if files_saved: 
+      print('add directory')
+      indexer.addDirectory(slicer.dicomDatabase, downloadDirectory, True)  # index with file copy
+      print('indexer wait for import to finish')
+      indexer.waitForImportFinished()
+      print('slicer process events')
+      slicer.app.processEvents()
     
     # Now delete the files from the temporary directory 
     print('delete the files from the temporary directory')
@@ -2160,12 +2169,12 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
 
     # Now load
     print ('now load the volumes')
-    if fileList: 
-      import DICOMScalarVolumePlugin
-      scalarVolumeReader = DICOMScalarVolumePlugin.DICOMScalarVolumePluginClass()
-      loadable = scalarVolumeReader.examineForImport([fileList])[0]
-      volume = scalarVolumeReader.load(loadable)
-    
+    # if fileList: 
+    import DICOMScalarVolumePlugin
+    scalarVolumeReader = DICOMScalarVolumePlugin.DICOMScalarVolumePluginClass()
+    loadable = scalarVolumeReader.examineForImport([fileList])[0]
+    volume = scalarVolumeReader.load(loadable)
+  
     return volume 
     
       

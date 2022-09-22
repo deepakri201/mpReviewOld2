@@ -32,7 +32,7 @@ import pydicom
 import shutil
 
 
-
+from DICOMLib import DICOMUtils
 
 
 class GoogleCloudPlatform(object):
@@ -2106,7 +2106,9 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     """ Load a series from a remote DICOM server """
           
     indexer = ctk.ctkDICOMIndexer()  
-    indexer.backgroundImportEnabled=True      
+    indexer.backgroundImportEnabled=True    
+    
+    db = slicer.dicomDatabase   
   
     # A temporary directory for the downloaded DICOM files from the remote database 
     downloadDirectory = os.path.join(slicer.dicomDatabase.databaseDirectory, 'tmp')
@@ -2151,6 +2153,15 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     if files_saved: 
       print('add directory')
       indexer.addDirectory(slicer.dicomDatabase, downloadDirectory, True)  # index with file copy
+      
+      # slicer.util.selectModule("DICOM")
+      # browserWidget = slicer.modules.DICOMWidget.browserWidget
+      # dicomBrowser = browserWidget.dicomBrowser
+      # dicomBrowser.importDirectory(downloadDirectory, dicomBrowser.ImportDirectoryAddLink)
+      # dicomBrowser.waitForImportFinished()
+      
+      # DICOMUtils.importDicom(downloadDirectory,db)
+      
       print('indexer wait for import to finish')
       indexer.waitForImportFinished()
       print('slicer process events')
@@ -2166,6 +2177,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     # Now load the newly added files 
     print ('load the newly added files')
     fileList = slicer.dicomDatabase.filesForSeries(selectedSeries)
+    print ('fileList: ' + str(fileList))
 
     # Now load
     print ('now load the volumes')
@@ -2585,6 +2597,13 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     # Add the tmp directory to the local DICOM database 
     indexer.addDirectory(slicer.dicomDatabase, segmentationsDir, True)  # index with file copy
     indexer.waitForImportFinished()
+    
+    # browserWidget = slicer.modules.DICOMWidget.browserWidget
+    # dicomBrowser = browserWidget.dicomBrowser
+    # dicomBrowser.importDirectory(segmentationsDir, dicomBrowser.ImportDirectoryAddLink)
+    # dicomBrowser.waitForImportFinished()
+    
+    # DICOMUtils.importDicom(segmentationsDir,db)
     
     # Now delete the files from the temporary directory 
     for f in os.listdir(segmentationsDir):

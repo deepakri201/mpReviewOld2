@@ -2851,8 +2851,8 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     if "terminology" in self.paramJSON.keys():
       print('terminology is in the JSON parameterization file') 
       # if so, parse it and SET  
-      self.terminologyFile = self.paramJSON['terminology']
-      # self.terminologyEntry = self.paramJSON['terminology']
+      # self.terminologyFile = self.paramJSON['terminology']
+      self.terminologyEntry = self.paramJSON['terminology']
       self.setJSONTerminology()
       
     else: 
@@ -2867,27 +2867,44 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     self.customLUTInfoIcon.show()
     self.customLUTInfoIcon.toolTip = 'Using Project-specific Terminology'
     
-    # # with open(self.terminologyEntry) as f: 
-    # with open(self.paramJSONFile) as f: 
-    #   termData = json.load(f) 
-    #   if 'terminology' in termData.keys():
-    #     termData = termData['terminology']
-    #     termCategory = termData["SegmentationCodes"]["Category"][0]
-    #     termType = termCategory["Type"][0]
-    #     defaultTerminologyEntry = (termData["SegmentationCategoryTypeContextName"]
-    #           + "~" + termCategory["CodingSchemeDesignator"] + "^" + termCategory["CodeValue"] + "^" + termCategory["CodeMeaning"]
-    #           + "~" + termType["CodingSchemeDesignator"] + "^" + termType["CodeValue"] + "^" + termType["CodeMeaning"]
-    #           + "~^^"
-    #           + "~Anatomic codes - DICOM master list~^^~^^")
-    #
-    #     terminologyEntry = slicer.vtkSlicerTerminologyEntry()
-    #     tlogic = slicer.modules.terminologies.logic()
-    #     tlogic.DeserializeTerminologyEntry(defaultTerminologyEntry, terminologyEntry)
-    #     terminologyEntry.GetTerminologyContextName() # should be set to 'Segmentation category and type - mpReview' 
-    #
-    #     self.terminologyName = terminologyEntry.GetTerminologyContextName()
-    #     self.editorWidget.defaultTerminologyEntry = defaultTerminologyEntry
-    #
+    # with open(self.terminologyEntry) as f: 
+    with open(self.paramJSONFile) as f: 
+      termData = json.load(f) 
+      if 'terminology' in termData.keys():
+        termData = termData['terminology']
+        termCategory = termData["SegmentationCodes"]["Category"][0]
+        termType = termCategory["Type"][0]
+        # defaultTerminologyEntry = (termData["SegmentationCategoryTypeContextName"]
+        #       + "~" + termCategory["CodingSchemeDesignator"] + "^" + termCategory["CodeValue"] + "^" + termCategory["CodeMeaning"]
+        #       + "~" + termType["CodingSchemeDesignator"] + "^" + termType["CodeValue"] + "^" + termType["CodeMeaning"]
+        #       + "~^^"
+        #       + "~Anatomic codes - DICOM master list~^^~^^")
+        defaultTerminologyEntry = (termData["SegmentationCategoryTypeContextName"]
+                + "~" + termCategory["CodingSchemeDesignator"] + "^" + termCategory["CodeValue"] + "^" + termCategory["CodeMeaning"]
+                + "~" + termType["CodingSchemeDesignator"] + "^" + termType["CodeValue"] + "^" + termType["CodeMeaning"]
+                + "~^^~~^^~^^") 
+    
+        terminologyEntry = slicer.vtkSlicerTerminologyEntry()
+        tlogic = slicer.modules.terminologies.logic()
+        tlogic.DeserializeTerminologyEntry(defaultTerminologyEntry, terminologyEntry)
+        print('The terminology context name is: ' + str(terminologyEntry.GetTerminologyContextName())) # should be set to 'Segmentation category and type - mpReview' 
+            
+        self.terminologyName = terminologyEntry.GetTerminologyContextName()
+        
+        tlogic.GetNthCategoryInTerminology(self.terminologyName, 0, terminologyEntry.GetCategoryObject())
+        tlogic.GetNthTypeInTerminologyCategory(self.terminologyName, terminologyEntry.GetCategoryObject(), 0, terminologyEntry.GetTypeObject())
+        
+        self.editorWidget.defaultTerminologyEntry = defaultTerminologyEntry
+        
+        self.structureNames = []
+        numberOfTerminologyTypes = tlogic.GetNumberOfTypesInTerminologyCategory(self.terminologyName, terminologyEntry.GetCategoryObject())
+        print('numberOfTerminologyTypes: ' + str(numberOfTerminologyTypes))
+        for terminologyTypeIndex in range(numberOfTerminologyTypes):
+          tlogic.GetNthTypeInTerminologyCategory(self.terminologyName, terminologyEntry.GetCategoryObject(), terminologyTypeIndex, terminologyEntry.GetTypeObject())
+          self.structureNames.append(terminologyEntry.GetTypeObject().GetCodeMeaning())
+          
+        print('self.structureNames: ' + str(self.structureNames))
+    
     # # import json
     # # with open(self.terminologyFile) as f:
     # #   termData = json.load(f)
@@ -2906,27 +2923,28 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     
     
     
-    tlogic = slicer.modules.terminologies.logic()
-    
-    self.terminologyName = tlogic.LoadTerminologyFromFile(self.terminologyFile)
-    
-    # Set the first entry in this terminology as the default so that when the user
-    # opens the terminoogy selector, the correct list is shown.
-    terminologyEntry = slicer.vtkSlicerTerminologyEntry()
-    terminologyEntry.SetTerminologyContextName(self.terminologyName)
-    tlogic.GetNthCategoryInTerminology(self.terminologyName, 0, terminologyEntry.GetCategoryObject())
-    tlogic.GetNthTypeInTerminologyCategory(self.terminologyName, terminologyEntry.GetCategoryObject(), 0, terminologyEntry.GetTypeObject())
-    defaultTerminologyEntry = tlogic.SerializeTerminologyEntry(terminologyEntry)
-    self.editorWidget.defaultTerminologyEntry = defaultTerminologyEntry
-    
-    # self.editorWidget.setDefaultTerminologyEntrySettingsKey(self.editorWidget.defaultTerminologyEntry)
-    
-    self.structureNames = []
-    numberOfTerminologyTypes = tlogic.GetNumberOfTypesInTerminologyCategory(self.terminologyName, terminologyEntry.GetCategoryObject())
-    for terminologyTypeIndex in range(numberOfTerminologyTypes):
-      tlogic.GetNthTypeInTerminologyCategory(self.terminologyName, terminologyEntry.GetCategoryObject(), terminologyTypeIndex, terminologyEntry.GetTypeObject())
-      self.structureNames.append(terminologyEntry.GetTypeObject().GetCodeMeaning())
-    
+    # tlogic = slicer.modules.terminologies.logic()
+    #
+    # self.terminologyName = tlogic.LoadTerminologyFromFile(self.terminologyFile)
+    #
+    # # Set the first entry in this terminology as the default so that when the user
+    # # opens the terminoogy selector, the correct list is shown.
+    # terminologyEntry = slicer.vtkSlicerTerminologyEntry()
+    # terminologyEntry.SetTerminologyContextName(self.terminologyName)
+    # tlogic.GetNthCategoryInTerminology(self.terminologyName, 0, terminologyEntry.GetCategoryObject())
+    # tlogic.GetNthTypeInTerminologyCategory(self.terminologyName, terminologyEntry.GetCategoryObject(), 0, terminologyEntry.GetTypeObject())
+    # defaultTerminologyEntry = tlogic.SerializeTerminologyEntry(terminologyEntry)
+    # self.editorWidget.defaultTerminologyEntry = defaultTerminologyEntry
+    #
+    # # self.editorWidget.setDefaultTerminologyEntrySettingsKey(self.editorWidget.defaultTerminologyEntry)
+    #
+    # self.structureNames = []
+    # numberOfTerminologyTypes = tlogic.GetNumberOfTypesInTerminologyCategory(self.terminologyName, terminologyEntry.GetCategoryObject())
+    # for terminologyTypeIndex in range(numberOfTerminologyTypes):
+    #   tlogic.GetNthTypeInTerminologyCategory(self.terminologyName, terminologyEntry.GetCategoryObject(), terminologyTypeIndex, terminologyEntry.GetTypeObject())
+    #   self.structureNames.append(terminologyEntry.GetTypeObject().GetCodeMeaning())
+    #
+
     return 
   
     

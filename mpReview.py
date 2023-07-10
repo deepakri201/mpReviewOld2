@@ -141,8 +141,8 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_local_configuration.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration.json")
-    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
-    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy_with_terminology.json")
+    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
+    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy_with_terminology.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration.json")
     self.parseJSON()
 

@@ -141,7 +141,9 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_local_configuration.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration.json")
-    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
+    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
+    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration_hierarchy.json")
+
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy_with_terminology.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration.json")
     self.parseJSON()
@@ -1239,6 +1241,11 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
           print('uploading seg dcm file to the remote server')
           self.copySegmentationsToRemoteDicomweb(labelFileName) # this one uses dicomweb client 
           
+          # also copy to output_directory if specified - other_server_url and output_directory must both be specified 
+          if self.parseJSONRemoteOtherServerURL and self.parseJSONRemoteOutputDirectory: 
+            print ("Copy segmentations to another folder")
+            self.copySegmentationsToOutputDirectory(labelFileName) 
+            
           # Now delete the files from the temporary directory 
           for f in os.listdir(downloadDirectory):
             os.remove(os.path.join(downloadDirectory, f))
@@ -1264,6 +1271,28 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     self.DICOMwebClient.store_instances(datasets=[dataset])
 
     return
+  
+  def copySegmentationsToOutputDirectory(self, labelFileName):
+    """Copies segmentations to the output directory after copying to dicomstore"""
+    
+    kaapanaOutputDir = os.path.join(self.parseJSONRemoteOutputDirectory, 
+                                    'batch',   
+                                    str(self.refSeriesNumber),
+                                    'slicer-results')
+    kaapanaOutputFileName = os.path.join(kaapanaOutputDir, 'result.dcm')
+    # Make directory 
+    try: 
+      os.mkdir(kaapanaOutputDir) 
+    except:
+      print('ERROR: unable to create output_directory: ' + str(kaapanaOutputDir))
+    # Copy file 
+    try: 
+      shutil.copy(labelFileName, kaapanaOutputFileName)
+    except: 
+      print('ERROR: unable to copy file from ' + str(labelFileName) + ' to ' + str(kaapanaOutputFileName))
+    
+    return 
+            
 
   def saveTargets(self, username, timestamp):
     savedMessage = ""
@@ -2554,6 +2583,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
             self.selectOtherRemoteDatabaseOKButton.setEnabled(False)
             
             self.parseJSONRemoteGCP()
+            self.parseJSONRemoteOutputDirectory()
           
           # If other server
           elif "other_server_url" in self.jsonRemoteDatabaseConfiguration.keys() and self.jsonRemoteDatabaseConfiguration["other_server_url"]: 
@@ -2565,6 +2595,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
             self.selectDatabaseOKButton.setEnabled(False)     
             
             self.parseJSONRemoteOtherServerURL()   
+            self.parseJSONRemoteOutputDirectory()
             
           else: 
             # popup warning 
@@ -2703,9 +2734,24 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
             # Set the URL 
             self.otherserverUrl = self.jsonOtherServerURL 
             self.OtherserverUrlLineEdit.text = self.otherserverUrl 
-          
+           
     return 
   
+  def parseJSONRemoteOutputDirectory(self):
+    """This parses the output_directory, where files can be additionally saved"""
+    
+    if self.jsonDatabaseType == "remote": 
+      if "remote_database_configuration" in self.paramJSON.keys():
+        print ("parsing json for remote server configuration")
+        self.jsonRemoteDatabaseConfiguration = self.paramJSON['remote_database_configuration']
+        
+        if "output_directory" in self.jsonRemoteDatabaseConfiguration.keys(): 
+          # check for existence before setting 
+          self.outputDirectory = "" 
+          if os.path.isdir(self.jsonRemoteDatabaseConfiguration["output_directory"]):
+            self.outputDirectory = self.jsonRemoteDatabaseConfiguration["output_directory"]
+    
+    return 
   
   def parseJSONGetStudyNamesRemoteDatabase(self):
     """This updates the study table according to the StudyUID_list provided in the json file"""

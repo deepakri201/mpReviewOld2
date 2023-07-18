@@ -139,10 +139,10 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     self.logic.createDirectory(self.tempDir, message='Temporary directory location: ' + self.tempDir)
     self.modulePath = os.path.dirname(slicer.util.modulePath(self.moduleName))
     
-    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_local_configuration.json")
+    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_local_configuration.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
-    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration_hierarchy.json")
+    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration_hierarchy.json")
 
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy_with_terminology.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration.json")
@@ -2954,7 +2954,9 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     
     tlogic = slicer.modules.terminologies.logic()
     
-    self.terminologyName = tlogic.LoadTerminologyFromFile(self.terminologyFile)
+    # self.terminologyName = tlogic.LoadTerminologyFromFile(self.terminologyFile)
+    self.terminologyName = tlogic.LoadTerminologyFromFile(os.path.join(os.path.dirname(slicer.modules.mpreview.path), 'Resources', self.terminologyFile))
+
     
     # Set the first entry in this terminology as the default so that when the user
     # opens the terminoogy selector, the correct list is shown.

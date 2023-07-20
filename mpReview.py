@@ -124,6 +124,9 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     self.informationWatchBox.setInformation("CurrentDataDir", truncatedPath, toolTip=directory)
 
   def __init__(self, parent = None):
+    
+    print("init of mpReview module")
+    
     ScriptedLoadableModuleWidget.__init__(self, parent)
     self.resourcesPath = os.path.join(slicer.modules.mpreview.path.replace(self.moduleName+".py",""), 'Resources')
     # self.qaFormURL = ''
@@ -143,8 +146,11 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
     self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy2.json")
+    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration_hierarchy2.json")
+    
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy_with_terminology.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration.json")
+    
     self.parseJSON()
 
   def getAllSliceWidgets(self):
@@ -2569,6 +2575,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     """Read in the JSON file that parameterizes mpReview"""
     # later this JSON file will be passed in the slicer startup script 
     
+    print("Opening the json file")
     with open(self.paramJSONFile, 'r') as f:
       self.paramJSON = json.load(f)
       print(self.paramJSON)
@@ -2591,7 +2598,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
         self.checkWhichDatabaseSelected()
         self.tabWidget.setCurrentIndex(1)
         
-        # self.parseJSONOutputConfiguration()
+        self.parseJSONOutputConfiguration()
         
       # If remote database 
       elif self.jsonDatabaseType == "remote" and "remote_database_configuration" in self.paramJSON.keys():
@@ -2612,7 +2619,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
             self.selectOtherRemoteDatabaseOKButton.setEnabled(False)
             
             self.parseJSONRemoteGCP()
-            # self.parseJSONOutputConfiguration()
+            self.parseJSONOutputConfiguration()
           
           # If other server
           elif "other_server_url" in self.jsonRemoteDatabaseConfiguration.keys() and self.jsonRemoteDatabaseConfiguration["other_server_url"]: 
@@ -2624,7 +2631,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
             self.selectDatabaseOKButton.setEnabled(False)     
             
             self.parseJSONRemoteOtherServerURL() 
-            # self.parseJSONOutputConfiguration()  
+            self.parseJSONOutputConfiguration()  
             
           else: 
             # popup warning 

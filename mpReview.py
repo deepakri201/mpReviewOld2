@@ -141,7 +141,8 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_local_configuration.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration.json")
-    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
+    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
+     self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy2.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy_with_terminology.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration.json")
     self.parseJSON()
@@ -1239,6 +1240,13 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
           print('uploading seg dcm file to the remote server')
           self.copySegmentationsToRemoteDicomweb(labelFileName) # this one uses dicomweb client 
           
+          # also copy to output_directory if specified - other_server_url and output_directory must both be specified 
+          # if self.parseJSONRemoteOtherServerURL and self.parseJSONRemoteOutputDirectory: 
+          if self.jsonOutputConfiguration: 
+            print ("Copy segmentations to another folder")
+            self.copySegmentationsToOutputDirectory(labelFileName) 
+          
+          
           # Now delete the files from the temporary directory 
           for f in os.listdir(downloadDirectory):
             os.remove(os.path.join(downloadDirectory, f))
@@ -1264,6 +1272,54 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     self.DICOMwebClient.store_instances(datasets=[dataset])
 
     return
+  
+  def copySegmentationsToOutputDirectory(self, labelFileName):
+    """Copies segmentations to the output directory after copying to dicomstore"""
+   
+    
+    # check if "output_mapping" exists
+    if self.jsonOutputMapping: 
+      # check if the series exists 
+      self.jsonOutputMappingSeries = []
+      for item in self.jsonOutputMapping:
+        if ("SeriesInstanceUID" in item.keys() and (item["SeriesInstanceUID"])): 
+          self.jsonOutputMappingSeries.append(item["SeriesInstanceUID"])
+      # check if the series we want is in the list 
+      if self.jsonOutputMappingSeries.index(self.refSeriesNumber): 
+        self.jsonOutputMappingFile = self.jsonOutputMapping[self.jsonOutputMappingSeries.index(self.refSeriesNumber)]["output_file"]
+      else:
+        self.jsonOutputMappingFile = "" 
+    
+    # if this exists, copy it. 
+    if self.jsonOutputMappingFile: 
+      try: 
+        shutil.copy(labelFileName, self.jsonOutputMappingFile)
+      except: 
+        print('ERROR: unable to copy file from ' + str(labelFileName) + ' to ' + str(self.jsonOutputMappingFile))
+        
+    return 
+          
+    
+    # first need to check if the referenced SeriesInstanceUID is in the list of possible seriesInstanceUIDs 
+    
+    # 
+    
+    # kaapanaOutputDir = os.path.join(self.parseJSONRemoteOutputDirectory, 
+    #                                 'batch',   
+    #                                 str(self.refSeriesNumber),
+    #                                 'slicer-results')
+    # kaapanaOutputFileName = os.path.join(kaapanaOutputDir, 'result.dcm')
+    # # Make directory 
+    # try: 
+    #   os.mkdir(kaapanaOutputDir) 
+    # except:
+    #   print('ERROR: unable to create output_directory: ' + str(kaapanaOutputDir))
+    # # Copy file 
+    # try: 
+    #   shutil.copy(labelFileName, kaapanaOutputFileName)
+    # except: 
+    #   print('ERROR: unable to copy file from ' + str(labelFileName) + ' to ' + str(kaapanaOutputFileName))
+     
 
   def saveTargets(self, username, timestamp):
     savedMessage = ""
@@ -2535,6 +2591,8 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
         self.checkWhichDatabaseSelected()
         self.tabWidget.setCurrentIndex(1)
         
+        self.parseJSONOutputConfiguration()
+        
       # If remote database 
       elif self.jsonDatabaseType == "remote" and "remote_database_configuration" in self.paramJSON.keys():
         
@@ -2554,6 +2612,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
             self.selectOtherRemoteDatabaseOKButton.setEnabled(False)
             
             self.parseJSONRemoteGCP()
+            self.parseJSONOutputConfiguration()
           
           # If other server
           elif "other_server_url" in self.jsonRemoteDatabaseConfiguration.keys() and self.jsonRemoteDatabaseConfiguration["other_server_url"]: 
@@ -2564,7 +2623,8 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
             self.updateSelectorAvailability(set=False)
             self.selectDatabaseOKButton.setEnabled(False)     
             
-            self.parseJSONRemoteOtherServerURL()   
+            self.parseJSONRemoteOtherServerURL() 
+            self.parseJSONOutputConfiguration()  
             
           else: 
             # popup warning 
@@ -2841,7 +2901,32 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
         
     self.updateSegmentationTabAvailability()  
      
-    return  
+    return 
+  
+  
+  def parseJSONOutputConfiguration(self):
+    """Parses the output_configuration field from the json file, used to save segmentations to a folder"""
+    
+    if "output_configuration" in self.paramJSON.keys(): 
+      print ("parsing json for output_configuration")
+      self.jsonOutputConfiguration = self.paramJSON['output_configuration']
+      if "output_directory" in self.jsonOutputConfiguration.keys(): 
+        # check if it's a directory 
+        if os.path.isdir(self.jsonOutputConfiguration["output_directory"]): 
+          # if directory does not exist, try to create it 
+          if not os.path.exists(self.jsonOutputConfiguration["output_directory"]): 
+            try:
+              os.path.mkdir(self.jsonOutputConfiguration["output_directory"])
+              # self.jsonOutputConfigurationOutputDirectory = self.jsonOutputConfiguration["output_directory"]
+            except: 
+              print ("ERROR: unable to create directory " + str(self.jsonOutputConfiguration["output_directory"]))
+            # Now check the existence of the output_mapping
+            if "output_mapping" in self.parseJSONOutputConfiguration().keys(): 
+              self.jsonOutputMapping = self.parseJSONOutputConfiguration["output_mapping"]
+            else: 
+              self.jsonOutputMapping = [] 
+    
+    return 
   
   
   def parseJSONTerminology(self):
@@ -2908,7 +2993,8 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     
     tlogic = slicer.modules.terminologies.logic()
     
-    self.terminologyName = tlogic.LoadTerminologyFromFile(self.terminologyFile)
+    # self.terminologyName = tlogic.LoadTerminologyFromFile(self.terminologyFile)
+    self.terminologyName = tlogic.LoadTerminologyFromFile(os.path.join(os.path.dirname(slicer.modules.mpreview.path), 'Resources', self.terminologyFile))
     
     # Set the first entry in this terminology as the default so that when the user
     # opens the terminoogy selector, the correct list is shown.

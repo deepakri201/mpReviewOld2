@@ -142,7 +142,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_local_configuration.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
-     self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy2.json")
+    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy2.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy_with_terminology.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration.json")
     self.parseJSON()
@@ -2591,7 +2591,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
         self.checkWhichDatabaseSelected()
         self.tabWidget.setCurrentIndex(1)
         
-        self.parseJSONOutputConfiguration()
+        # self.parseJSONOutputConfiguration()
         
       # If remote database 
       elif self.jsonDatabaseType == "remote" and "remote_database_configuration" in self.paramJSON.keys():
@@ -2612,7 +2612,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
             self.selectOtherRemoteDatabaseOKButton.setEnabled(False)
             
             self.parseJSONRemoteGCP()
-            self.parseJSONOutputConfiguration()
+            # self.parseJSONOutputConfiguration()
           
           # If other server
           elif "other_server_url" in self.jsonRemoteDatabaseConfiguration.keys() and self.jsonRemoteDatabaseConfiguration["other_server_url"]: 
@@ -2624,7 +2624,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
             self.selectDatabaseOKButton.setEnabled(False)     
             
             self.parseJSONRemoteOtherServerURL() 
-            self.parseJSONOutputConfiguration()  
+            # self.parseJSONOutputConfiguration()  
             
           else: 
             # popup warning 

@@ -1,0 +1,41 @@
+{
+	"username": "deepa", 
+	"database_type": "remote",
+	"remote_database_configuration": 
+		{
+			"project_id":"",
+			"location_id":"",
+			"dataset_id":"",
+			"dicomstore_id":"", 
+			"other_server_url":"http://dcm4chee-service.services.svc:8080/dcm4chee-arc/aets/KAAPANA/rs"
+		},
+
+    "uids":[
+        {
+            "StudyInstanceUID":"1.3.6.1.4.1.14519.5.2.1.3671.4754.121472087445374646718121301133",
+            "SeriesInstanceUID_list": ["1.3.6.1.4.1.14519.5.2.1.3671.4754.983460207615355998147518323000"]
+        },
+        {
+            "StudyInstanceUID":"1.3.6.1.4.1.14519.5.2.1.3671.4754.288848219213026850354055725664",
+            "SeriesInstanceUID_list": ["1.3.6.1.4.1.14519.5.2.1.3671.4754.609837242670719860929372097937"]
+        }
+	],
+	
+	"output_configuration":
+		{
+			"output_directory":"WORKFLOW_DIR",
+			"output_mapping":[
+			{
+				"SeriesInstanceUID": "1.3.6.1.4.1.14519.5.2.1.3671.4754.983460207615355998147518323000",
+				"output_file": "batch/1.3.6.1.4.1.14519.5.2.1.3671.4754.983460207615355998147518323000/slicer-results/results.dcm"
+			}, 
+			{
+				"SeriesInstanceUID": "1.3.6.1.4.1.14519.5.2.1.3671.4754.609837242670719860929372097937",
+				"output_file": "batch/1.3.6.1.4.1.14519.5.2.1.3671.4754.609837242670719860929372097937/slicer-results/results.dcm"
+			}
+			]
+		},
+		
+	"terminology": "SegmentationCategoryTypeModifier-mpReview.json"
+	
+} 

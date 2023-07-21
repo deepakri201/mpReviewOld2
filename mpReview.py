@@ -1222,7 +1222,12 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
      
           # exporter.export(exportables, labelFileName)
           exporter.export(exportables)
-          
+
+          # Also copy to another output_directory if specified
+          if self.jsonOutputConfiguration:
+            print("Copy segmentations to another folder")
+            self.copySegmentationsToOutputDirectory(labelFileName)
+
         elif (database_type=="remote"):
         
           # Create temporary directory for saving the DICOM SEG file  

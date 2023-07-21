@@ -131,6 +131,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     self.resourcesPath = os.path.join(slicer.modules.mpreview.path.replace(self.moduleName+".py",""), 'Resources')
     # self.qaFormURL = ''
     # self.piradsFormURL = ''
+    self.paramJSON = None 
 
     # mrml node for invoking command line modules
     self.CLINode = None
@@ -149,6 +150,13 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy2_linux.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration_hierarchy2.json")
 
+    # check for existence
+    if os.path.exists(self.paramJSONFile): 
+      print('this json file exists: ' + str(self.paramJSONFile))
+    else: 
+      print('this json file does not exist: ' + str(self.paramJSONFile))
+      
+    # try loading
     self.parseJSON()
 
   def getAllSliceWidgets(self):
@@ -263,6 +271,8 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
 
     # self.dataDirButton.directory = self.getSetting('InputLocation')
     self.currentTabIndex = 0
+
+    # self.parseJSON() # I added  
 
     self.checkAndSetLUT() # I added 
     
@@ -2576,6 +2586,11 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     with open(self.paramJSONFile, 'r') as f:
       self.paramJSON = json.load(f)
       print(self.paramJSON)
+      
+    # Not sure why the below works instead.. 
+    # with open(self.paramJSONFile, 'r') as f:
+      # paramJSON = json.load(f)
+      # print(paramJSON) 
     
   def parseJSONDatabase(self):
     """Parses the type of database - local or remote """
@@ -2940,8 +2955,12 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
   def parseJSONTerminology(self):
     """Parse the terminology from the json file"""
     
+    with (open(self.paramJSONFile) as f):
+      paramJSON = json.load(f) 
+      
     # check if "terminology" is a key in the json file
-    if "terminology" in self.paramJSON.keys():
+    # if "terminology" in self.paramJSON.keys():
+    if "terminology" in paramJSON.keys():
       print('terminology is in the JSON parameterization file') 
       # if so, parse it and SET  
       self.terminologyFile = self.paramJSON['terminology']

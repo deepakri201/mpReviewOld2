@@ -143,8 +143,10 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     self.modulePath = os.path.dirname(slicer.util.modulePath(self.moduleName))
 
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_local_configuration_hierarchy_mac.json")
+    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_local_configuration_hierarchy_linux.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
-    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy2_mac.json")
+    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy2_mac.json")
+    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy2_linux.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration_hierarchy2.json")
 
     self.parseJSON()

@@ -141,16 +141,12 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     self.tempDir = os.path.join(slicer.app.temporaryPath, 'mpReview-tmp')
     self.logic.createDirectory(self.tempDir, message='Temporary directory location: ' + self.tempDir)
     self.modulePath = os.path.dirname(slicer.util.modulePath(self.moduleName))
-    
-    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_local_configuration.json")
-    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration.json")
+
+    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_local_configuration_hierarchy_mac.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
     self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy2_mac.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration_hierarchy2.json")
-    
-    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy_with_terminology.json")
-    # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration.json")
-    
+
     self.parseJSON()
 
   def getAllSliceWidgets(self):
@@ -1323,28 +1319,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     else:
       print("the self.jsonOutputMappingFile does not exist")
         
-    return 
-          
-    
-    # first need to check if the referenced SeriesInstanceUID is in the list of possible seriesInstanceUIDs 
-    
-    # 
-    
-    # kaapanaOutputDir = os.path.join(self.parseJSONRemoteOutputDirectory, 
-    #                                 'batch',   
-    #                                 str(self.refSeriesNumber),
-    #                                 'slicer-results')
-    # kaapanaOutputFileName = os.path.join(kaapanaOutputDir, 'result.dcm')
-    # # Make directory 
-    # try: 
-    #   os.mkdir(kaapanaOutputDir) 
-    # except:
-    #   print('ERROR: unable to create output_directory: ' + str(kaapanaOutputDir))
-    # # Copy file 
-    # try: 
-    #   shutil.copy(labelFileName, kaapanaOutputFileName)
-    # except: 
-    #   print('ERROR: unable to copy file from ' + str(labelFileName) + ' to ' + str(kaapanaOutputFileName))
+    return
      
 
   def saveTargets(self, username, timestamp):
@@ -2937,28 +2912,25 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     if "output_configuration" in self.paramJSON.keys(): 
       print ("parsing json for output_configuration")
       self.jsonOutputConfiguration = self.paramJSON['output_configuration']
+      # if output_directory is a key
       if "output_directory" in self.jsonOutputConfiguration.keys():
         print('output_directory is in the keys of the output_configuration')
-        # check if it's a directory 
-        if os.path.isdir(self.jsonOutputConfiguration["output_directory"]):
-          print('the output_directory is a directory')
-          # if directory does not exist, try to create it 
-          if not os.path.exists(self.jsonOutputConfiguration["output_directory"]): 
-            try:
-              os.path.mkdir(self.jsonOutputConfiguration["output_directory"])
-              print('created the output directory')
-              # self.jsonOutputConfigurationOutputDirectory = self.jsonOutputConfiguration["output_directory"]
-            except: 
-              print ("ERROR: unable to create directory " + str(self.jsonOutputConfiguration["output_directory"]))
-          else:
-            print('the output_directory already exists')
-          # Now check the existence of the output_mapping
-          if "output_mapping" in self.jsonOutputConfiguration.keys():
-            self.jsonOutputMapping = self.jsonOutputConfiguration["output_mapping"]
-            print('self.jsonOutputMapping: ' + str(self.jsonOutputMapping))
-          else:
-            self.jsonOutputMapping = []
-            print('the output_mapping does not exist')
+        # if directory does not exist, try to create it
+        if not os.path.exists(self.jsonOutputConfiguration["output_directory"]):
+          try:
+            os.makedirs(self.jsonOutputConfiguration["output_directory"])
+            print('created the output directory')
+          except:
+            print ("ERROR: unable to create directory " + str(self.jsonOutputConfiguration["output_directory"]))
+        else:
+          print('the output_directory already exists')
+        # Now check the existence of the output_mapping
+        if "output_mapping" in self.jsonOutputConfiguration.keys():
+          self.jsonOutputMapping = self.jsonOutputConfiguration["output_mapping"]
+          print('self.jsonOutputMapping: ' + str(self.jsonOutputMapping))
+        else:
+          self.jsonOutputMapping = []
+          print('the output_mapping does not exist')
     
     return 
   

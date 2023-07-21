@@ -145,7 +145,7 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_local_configuration.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy.json")
-    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy2.json")
+    self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy2_mac.json")
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_kaapana_configuration_hierarchy2.json")
     
     # self.paramJSONFile = os.path.join(self.resourcesPath, "mpReview_remote_gcp_configuration_hierarchy_with_terminology.json")
@@ -1281,27 +1281,42 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
   
   def copySegmentationsToOutputDirectory(self, labelFileName):
     """Copies segmentations to the output directory after copying to dicomstore"""
-   
-    
+
     # check if "output_mapping" exists
-    if self.jsonOutputMapping: 
-      # check if the series exists 
+    if self.jsonOutputMapping:
+      # check if the series exists
       self.jsonOutputMappingSeries = []
       for item in self.jsonOutputMapping:
-        if ("SeriesInstanceUID" in item.keys() and (item["SeriesInstanceUID"])): 
+        if ("SeriesInstanceUID" in item.keys() and (item["SeriesInstanceUID"])):
           self.jsonOutputMappingSeries.append(item["SeriesInstanceUID"])
-      # check if the series we want is in the list 
-      if self.jsonOutputMappingSeries.index(self.refSeriesNumber): 
+
+      try:
+        self.jsonOutputMappingSeries.index(self.refSeriesNumber)
         self.jsonOutputMappingFile = self.jsonOutputMapping[self.jsonOutputMappingSeries.index(self.refSeriesNumber)]["output_file"]
-      else:
-        self.jsonOutputMappingFile = "" 
+      except:
+        print('the series we want is not in the list')
+        self.jsonOutputMappingFile = ""
+    else:
+      print('the self.jsonOutputMapping does not exist')
     
     # if this exists, copy it. 
-    if self.jsonOutputMappingFile: 
-      try: 
-        shutil.copy(labelFileName, self.jsonOutputMappingFile)
-      except: 
-        print('ERROR: unable to copy file from ' + str(labelFileName) + ' to ' + str(self.jsonOutputMappingFile))
+    if self.jsonOutputMappingFile:
+      output_directory = str(self.jsonOutputConfiguration["output_directory"])
+      output_filename = os.path.join(str(output_directory), str(self.jsonOutputMappingFile))
+      print('trying to copy from ' + str(labelFileName) + ' to ' + str(output_filename))
+      if not os.path.exists(labelFileName):
+        print("ERROR: the labelFileName " + str(labelFileName) + " does not exist")
+      else:
+        try:
+          os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+        except:
+          print('ERROR: cannot create subdirectories to save output_filename: ' + str(output_filename))
+        try:
+          shutil.copy(labelFileName, output_filename)
+        except:
+          print('ERROR: unable to copy file from ' + str(labelFileName) + ' to ' + str(output_filename))
+    else:
+      print("the self.jsonOutputMappingFile does not exist")
         
     return 
           
@@ -2917,21 +2932,28 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
     if "output_configuration" in self.paramJSON.keys(): 
       print ("parsing json for output_configuration")
       self.jsonOutputConfiguration = self.paramJSON['output_configuration']
-      if "output_directory" in self.jsonOutputConfiguration.keys(): 
+      if "output_directory" in self.jsonOutputConfiguration.keys():
+        print('output_directory is in the keys of the output_configuration')
         # check if it's a directory 
-        if os.path.isdir(self.jsonOutputConfiguration["output_directory"]): 
+        if os.path.isdir(self.jsonOutputConfiguration["output_directory"]):
+          print('the output_directory is a directory')
           # if directory does not exist, try to create it 
           if not os.path.exists(self.jsonOutputConfiguration["output_directory"]): 
             try:
               os.path.mkdir(self.jsonOutputConfiguration["output_directory"])
+              print('created the output directory')
               # self.jsonOutputConfigurationOutputDirectory = self.jsonOutputConfiguration["output_directory"]
             except: 
               print ("ERROR: unable to create directory " + str(self.jsonOutputConfiguration["output_directory"]))
-            # Now check the existence of the output_mapping
-            if "output_mapping" in self.parseJSONOutputConfiguration().keys(): 
-              self.jsonOutputMapping = self.parseJSONOutputConfiguration["output_mapping"]
-            else: 
-              self.jsonOutputMapping = [] 
+          else:
+            print('the output_directory already exists')
+          # Now check the existence of the output_mapping
+          if "output_mapping" in self.jsonOutputConfiguration.keys():
+            self.jsonOutputMapping = self.jsonOutputConfiguration["output_mapping"]
+            print('self.jsonOutputMapping: ' + str(self.jsonOutputMapping))
+          else:
+            self.jsonOutputMapping = []
+            print('the output_mapping does not exist')
     
     return 
   

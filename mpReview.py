@@ -896,7 +896,9 @@ class mpReviewWidget(ScriptedLoadableModuleWidget, ModuleWidgetMixin):
 
   def checkAndSetLUT(self):
     # Default to module color table
-    self.terminologyFile = os.path.join(self.resourcesPath, "SegmentationCategoryTypeModifier-mpReview.json")
+    # self.terminologyFile = os.path.join(self.resourcesPath, "SegmentationCategoryTypeModifier-mpReview.json")
+    self.terminologyFile = os.path.join(self.resourcesPath, "SegmentationCategoryTypeModifier-mpReview-sternum.json")
+
     # print ('self.terminologyFile: ' + str(self.terminologyFile))
 
     self.customLUTInfoIcon.show()

@@ -1,0 +1,22 @@
+{
+  "SegmentationCategoryTypeContextName": "Segmentation category and type - mpReview",
+  "@schema": "https://raw.githubusercontent.com/qiicr/dcmqi/master/doc/segment-context-schema.json#",
+  "SegmentationCodes": {
+    "Category": [
+      {
+        "CodeMeaning": "Tissue",
+        "CodingSchemeDesignator": "SCT",
+        "CodeValue": "85756007",
+        "Type": [
+          {
+            "CodeMeaning": "Sternum",
+            "CodingSchemeDesignator": "mpReview",
+            "CodeValue": "1",
+            "recommendedDisplayRGBValue": [51, 204, 0]
+          }
+        ],
+        "showAnatomy": false
+      }
+    ]
+  }
+}
